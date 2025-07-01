@@ -5,8 +5,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+rename env.example to .env
+# and
 npm install
-# or
+# and
 npm run dev
 ```
 
