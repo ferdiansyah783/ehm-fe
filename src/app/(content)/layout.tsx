@@ -1,5 +1,3 @@
-"use client";
-
 import { AppSidebar } from "../../components/app-sidebar";
 import ProtectedRoute from "../../components/protected-route";
 import ReactQueryProvider from "../../components/react-query-provider";
