@@ -32,8 +32,9 @@ export default function DashboardPage() {
   };
 
   const [formData, setFormData] = useState(initial());
+  const [openDialog, setOpenDialog] = useState(false);
 
-  const { user, logout } = useAuth();
+  const { user, logout, checkAuth } = useAuth();
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -47,7 +48,16 @@ export default function DashboardPage() {
 
   const handleUpdateAdmin = useMutation({
     mutationFn: () => updateAdmin(user!.id, formData),
-    onSuccess: () => toast.success("Profile updated successfully"),
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+      checkAuth();
+    },
+    onError: (error: any) => {
+      const message = Array.isArray(error.response.data?.message)
+        ? error.response.data?.message[0]
+        : error.response.data?.message;
+      toast.error(message);
+    },
   });
 
   const handleChangeGender = (value: string) => {
@@ -62,7 +72,7 @@ export default function DashboardPage() {
       gender: user!.gender,
       birthDate: user!.birthDate,
     });
-  }, []);
+  }, [openDialog]);
 
   return (
     <div>
@@ -71,16 +81,17 @@ export default function DashboardPage() {
       </h1>
 
       <div className="flex gap-2">
-        <Dialog>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <form>
             <DialogTrigger asChild>
               <Button>Edit Profile</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px]">
               <DialogHeader>
-                <DialogTitle>Add Employee</DialogTitle>
+                <DialogTitle>Edit Profile</DialogTitle>
                 <DialogDescription>
-                  Add a new employee to the system
+                  Make changes to your profile here. Click save when you&apos;re
+                  done.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 grid-cols-2">
@@ -113,7 +124,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="gender">Gender</Label>
-                  <SelectGender value={formData.gender} handleChangeGender={handleChangeGender} />
+                  <SelectGender
+                    value={formData.gender}
+                    handleChangeGender={handleChangeGender}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="birth-date">BirtDate</Label>
@@ -140,7 +154,9 @@ export default function DashboardPage() {
           </form>
         </Dialog>
 
-        <Button variant="destructive" onClick={logout}>Logout</Button>
+        <Button variant="destructive" onClick={logout}>
+          Logout
+        </Button>
       </div>
     </div>
   );

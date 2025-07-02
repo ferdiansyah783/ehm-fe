@@ -3,6 +3,7 @@
 import ReactQueryProvider from "@/components/react-query-provider";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
+import AuthRoute from "../../components/auth-route";
 
 type Props = {
   children: React.ReactNode;
@@ -20,9 +21,11 @@ const Layout = ({ children }: Props) => {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex justify-center items-center">
-      <ReactQueryProvider>{children}</ReactQueryProvider>
-    </div>
+    <AuthRoute>
+      <div className="h-screen w-screen flex justify-center items-center">
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+      </div>
+    </AuthRoute>
   );
 };
 

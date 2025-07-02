@@ -27,6 +27,16 @@ export async function createLeave(id: number, data: Leave) {
   }
 }
 
+export async function updateLeave(id: number, data: Leave) {
+  try {
+    const response = await api.put(`/api/leave/${id}`, data);
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function deleteLeave(id: number) {
   try {
     const response = await api.delete(`/api/leave/${id}`);

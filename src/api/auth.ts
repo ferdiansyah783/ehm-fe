@@ -37,3 +37,12 @@ export async function signIn({
     throw error;
   }
 }
+
+export async function getProfile() {
+  try {
+    const response = await api.get("/api/auth/me")
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}

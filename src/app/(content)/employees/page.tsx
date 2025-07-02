@@ -16,8 +16,10 @@ import {
   DialogTrigger,
 } from "../../../components/ui/dialog";
 import { Input } from "../../../components/ui/input";
-import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { toast } from "sonner";
+import SelectGender from "../../../components/select-gender";
+import { useEmployeeColumns } from "./columns";
 
 export default function EmployeePage() {
   const initalFormData = () => {
@@ -32,16 +34,29 @@ export default function EmployeePage() {
   };
 
   const [formData, setFormData] = useState(initalFormData());
+  const [openDialog, setOpenDialog] = useState(false);
+  const [updated, setUpdated] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["employees"],
+    queryKey: ["employees", !updated],
     queryFn: () => getEmployees({ page: 1, take: 10 }),
   });
+
+  const columns = useEmployeeColumns();
 
   const handleCreateEmployee = useMutation({
     mutationFn: () => createEmployee(formData),
     onSuccess: () => {
-      console.log("success");
+      toast.success("Employee created successfully");
+      setFormData(initalFormData());
+      setOpenDialog(false);
+      setUpdated((prev) => !prev);
+    },
+    onError: (error: any) => {
+      const message = Array.isArray(error.response.data?.message)
+        ? error.response.data?.message[0]
+        : error.response.data?.message;
+      toast.error(message);
     },
   });
 
@@ -63,7 +78,7 @@ export default function EmployeePage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Employee</h1>
 
-      <Dialog>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <form>
           <DialogTrigger asChild>
             <Button>Add New</Button>
@@ -99,17 +114,18 @@ export default function EmployeePage() {
                 <Input
                   onChange={handleChange}
                   value={formData.email}
+                  placeholder="q4NlF@gmail.com"
                   id="email"
                   name="email"
                 />
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="gender">Gender</Label>
-                <Input
-                  onChange={handleChange}
+                <SelectGender
                   value={formData.gender}
-                  id="gender"
-                  name="gender"
+                  handleChangeGender={(value) =>
+                    setFormData((prev) => ({ ...prev, gender: value }))
+                  }
                 />
               </div>
               <div className="grid gap-3">
@@ -117,6 +133,7 @@ export default function EmployeePage() {
                 <Input
                   onChange={handleChange}
                   value={formData.phoneNumber}
+                  placeholder="+6287894573986"
                   id="phone-number"
                   name="phoneNumber"
                 />

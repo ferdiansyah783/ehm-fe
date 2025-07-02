@@ -8,6 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 interface User {
   id: number;
@@ -24,6 +25,7 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   isAuthenticated: boolean;
+  checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem("accessToken", accessToken.token);
       setUser(user);
+      toast.success("Login successfully");
     } catch (error) {
       throw error;
     }
@@ -99,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem("accessToken");
     setUser(null);
+    toast.success("Logout successfully");
   };
 
   const value = {
@@ -107,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     loading,
     isAuthenticated: !!user,
+    checkAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

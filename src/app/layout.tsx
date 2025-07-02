@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex h-screen bg-gray-100">
         <AuthProvider>{children}</AuthProvider>
-        <Toaster />
+        <Toaster position="top-center" />
       </body>
     </html>
   );

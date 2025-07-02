@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ChangeEvent, useState } from "react";
+import { signUp } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,21 +13,26 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import DatePicker from "./DatePicker";
 import { useMutation } from "@tanstack/react-query";
-import { signUp } from "@/api/auth";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { ChangeEvent, useState } from "react";
+import { toast } from "sonner";
 import SelectGender from "../../../../components/select-gender";
 
 const page = () => {
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const initial = () => {
+    return {
+      firstName: "",
+      lastName: "",
+      password: "",
+      email: "",
+      gender: "",
+      birthDate: "",
+    };
+  };
+
+  const [formData, setFormData] = useState(initial());
 
   const router = useRouter();
 
@@ -35,58 +40,29 @@ const page = () => {
     mutationKey: ["Auth-SignUp"],
     mutationFn: signUp,
     onSuccess: () => {
-      alert("Signup success, please login");
+      toast.success("Signup success, please login");
       router.push("/auth/sign-in");
     },
-    onError: (error) => {
-      alert(error.message[0]);
+    onError: (error: any) => {
+      const message = Array.isArray(error.response.data?.message)
+        ? error.response.data?.message[0]
+        : error.response.data?.message;
+      toast.error(message);
     },
   });
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const handleOpen = () => {
-    setIsOpen(true);
-  };
-
-  const handleChangeFirstName = (event: ChangeEvent<HTMLInputElement>) => {
-    setFirstName(event.target.value);
-  };
-
-  const handleChangeLastName = (event: ChangeEvent<HTMLInputElement>) => {
-    setLastName(event.target.value);
-  };
-
-  const handleChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-  };
-
-  const handleChangePassword = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
-
-  const handleChangeGender = (value: string) => {
-    setGender(value);
-  };
-
-  const handleChangeDate = (date: Date | undefined) => {
-    setDate(date);
-    setIsOpen(false);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target as HTMLInputElement;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   const handleSignUp = () => {
-    if (!date) {
-      alert("please input field first");
-    } else {
-      mutateSignUp.mutate({
-        firstName,
-        lastName,
-        email,
-        password,
-        gender,
-        birthDate: format(date || "", "yyyy-MM-dd"),
-      });
-    }
+    mutateSignUp.mutate(formData);
   };
 
   return (
@@ -109,59 +85,68 @@ const page = () => {
               <Label htmlFor="fullname">First Name</Label>
               <Input
                 id="firstname"
+                name="firstName"
                 type="text"
                 placeholder="First Name..."
                 required
-                value={firstName}
-                onChange={handleChangeFirstName}
+                value={formData.firstName}
+                onChange={handleChange}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lastname">Last Name</Label>
               <Input
                 id="lastname"
+                name="lastName"
                 type="text"
                 placeholder="Lastname..."
                 required
-                value={lastName}
-                onChange={handleChangeLastName}
+                value={formData.lastName}
+                onChange={handleChange}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="Email..."
                 required
-                value={email}
-                onChange={handleChangeEmail}
+                value={formData.email}
+                onChange={handleChange}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="Password..."
                 required
-                value={password}
-                onChange={handleChangePassword}
+                value={formData.password}
+                onChange={handleChange}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="gender">Gender</Label>
               <SelectGender
-                value={gender}
-                handleChangeGender={handleChangeGender}
+                value={formData.gender}
+                handleChangeGender={(value: any) => {
+                  setFormData((prev) => ({ ...prev, gender: value }));
+                }}
               />
             </div>
             <div className="grid gap-2">
-              <DatePicker
-                isOpen={isOpen}
-                date={date}
-                handleChangeDate={handleChangeDate}
-                handleOpen={handleOpen}
+              <Label htmlFor="birthdate">Birth Date</Label>
+              <Input
+                id="birthdate"
+                name="birthDate"
+                placeholder="YYYY-MM-DD"
+                required
+                value={formData.birthDate}
+                onChange={handleChange}
               />
             </div>
           </div>

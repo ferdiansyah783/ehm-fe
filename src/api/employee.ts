@@ -32,3 +32,23 @@ export async function createEmployee(data: Employee) {
     throw error;
   }
 }
+
+export async function updateEmployee(id: number, data: Employee) {
+  try {
+    const response = await api.put(`/api/employee/${id}`, data);
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteEmployee(id: number) {
+  try {
+    const response = await api.delete(`/api/employee/${id}`);
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}

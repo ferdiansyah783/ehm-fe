@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-label";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChangeEvent, useState } from "react";
 import { createLeave, getLeaves } from "../../../api/leave";
 import {
@@ -16,7 +16,6 @@ import {
   DialogTrigger,
 } from "../../../components/ui/dialog";
 import { Input } from "../../../components/ui/input";
-import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { getEmployees } from "../../../api/employee";
 import {
@@ -29,6 +28,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { toast } from "sonner";
+import { useLeaveColumns } from "./columns";
 
 export default function LeavePage() {
   const initalFormData = () => {
@@ -40,7 +40,12 @@ export default function LeavePage() {
     };
   };
 
+  const queryClient = useQueryClient();
+
   const [formData, setFormData] = useState(initalFormData());
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const columns = useLeaveColumns();
 
   const { data, isLoading } = useQuery({
     queryKey: ["leaves"],
@@ -54,8 +59,18 @@ export default function LeavePage() {
 
   const handleCreateLeave = useMutation({
     mutationFn: () => createLeave(Number(formData.employee), formData),
-    onSuccess: () => toast.success("Leave approved"),
-    onError: () => toast.error("Leave not approved"),
+    onSuccess: () => {
+      toast.success("Leave created successfully");
+      setFormData(initalFormData());
+      setOpenDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["leaves"] });
+    },
+    onError: (error: any) => {
+      const message = Array.isArray(error.response.data?.message)
+        ? error.response.data?.message[0]
+        : error.response.data?.message;
+      toast.error(message);
+    },
   });
 
   const handleChange = (
@@ -76,7 +91,7 @@ export default function LeavePage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Leave</h1>
 
-      <Dialog>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <form>
           <DialogTrigger asChild>
             <Button>Add New</Button>
@@ -105,6 +120,7 @@ export default function LeavePage() {
                   value={formData.startDate}
                   id="start-date"
                   name="startDate"
+                  placeholder="YYYY-MM-DD"
                 />
               </div>
               <div className="grid gap-3">
@@ -114,6 +130,7 @@ export default function LeavePage() {
                   value={formData.endDate}
                   id="end-date"
                   name="endDate"
+                  placeholder="YYYY-MM-DD"
                 />
               </div>
               <div className="grid gap-3">

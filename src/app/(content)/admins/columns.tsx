@@ -62,13 +62,6 @@ export const columns: ColumnDef<Employee>[] = [
 
       return (
         <div className="flex justify-items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => console.log("Edit", admin)}
-          >
-            Edit
-          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
